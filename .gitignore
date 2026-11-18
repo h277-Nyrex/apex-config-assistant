@@ -1,0 +1,25 @@
+# Local scratch
+.tmp-*/
+.tmp-*
+.tmp_*
+.agent-teams/
+.impeccable/
+
+# Archives and local backups
+*.zip
+*.7z
+*.rar
+_legacy/
+
+# Build and dependency output
+**/bin/
+**/obj/
+**/dist/
+node_modules/
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<title>Apex 配置助手 · 浏览器本地版</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body data-page="loader">
+
+<div class="app">
+  <aside class="sidebar" data-testid="sidebar">
+    <div class="brand" data-testid="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 21 20H3z"/><path d="M12 9v6"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Apex 配置助手</div>
+        <div class="brand-sub">浏览器本地版 · 不上传文件</div>
+      </div>
+    </div>
+
+    <nav class="nav" data-testid="nav" aria-label="主导航">
+      <span class="nav-ink" aria-hidden="true"></span>
+      <div class="nav-label">开始</div>
+      <a href="#loader" data-nav="loader" data-testid="nav-loader">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>
+        文件工作台<span class="pill mute" id="nav-file-count">0/4</span>
+      </a>
+      <a href="#dashboard" data-nav="dashboard" data-testid="nav-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+        当前配置
+      </a>
+
+      <div class="nav-label nav-label-spaced">核心调校</div>
+      <a href="#aim" data-nav="aim" data-testid="nav-aim">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2"/></svg>
+        视野与灵敏度
+      </a>
+      <a href="#graphics" data-nav="graphics" data-testid="nav-graphics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        画质与分辨率
+      </a>
+      <a href="#launch" data-nav="launch" data-testid="nav-launch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4l7 7-7 7"/><path d="M13 4h6v6"/><path d="M19 14v6h-6"/></svg>
+        启动参数
+      </a>
+
+      <div class="nav-label nav-label-spaced">交付</div>
+      <a href="#export" data-nav="export" data-testid="nav-export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+        导出与恢复
+      </a>
+    </nav>
+
+    <div class="sidebar-foot" data-testid="local-only">
+      <div class="row"><span class="dot warn"></span><b class="sidebar-strong">本地解析模式</b></div>
+      <div class="row">文件只在浏览器内处理</div>
+      <div class="row"><span class="dot mute"></span>无账号 · 无网络请求 · 无遥测</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="page-head">
+        <h1 data-testid="page-title">文件工作台</h1>
+        <p data-testid="page-subtitle">手动载入 Apex 文件后开始分析</p>
+      </div>
+      <div class="topbar-right">
+        <span class="chip" id="chip-files" data-testid="status-files"><span class="dot mute"></span><span>文件 0/4</span></span>
+        <span class="chip" id="chip-mode" data-testid="status-mode"><span class="dot ok"></span><span>本地解析</span></span>
+        <span class="chip" id="chip-export" data-testid="status-export"><span class="dot mute"></span><span>尚未导出</span></span>
+        <button class="btn sm ghost" id="btn-help" data-testid="btn-help">使用说明</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="banner danger" id="global-error" hidden role="alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 9v4M12 17v.5"/><path d="M10.3 4.3 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/></svg>
+          <div class="grow"><div class="title" id="global-error-title">操作失败</div><span id="global-error-text"></span></div>
+          <button class="btn sm ghost" id="global-error-close">关闭</button>
+        </div>
+
+        <section class="page is-active" data-page="loader" id="page-loader">
+          <div class="banner info" data-testid="privacy-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l7 4v6c0 4-3 7-7 8-4-1-7-4-7-8V7z"/><path d="m9 12 2 2 4-4"/></svg>
+            <div class="grow"><div class="title">本工具不会自动扫描电脑</div>请手动选择 Apex 配置文件。文件只在当前浏览器内解析，不会上传到服务器；刷新页面后可选择恢复本地会话。</div>
+          </div>
+
+          <div class="banner info" id="session-banner" hidden>
+            <div class="grow"><div class="title">发现上次会话</div><span id="session-text">可以从浏览器本地缓存恢复上次载入的文件与草稿。</span></div>
+            <div class="btn-row" style="margin:0"><button class="btn sm" id="btn-session-restore">恢复会话</button><button class="btn sm ghost" id="btn-session-ignore">忽略</button></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>1. 载入 Apex 文件</h2>
+              <span class="sub">支持点击选择、拖拽或粘贴文本</span>
+              <div class="right"><span class="pill mute" id="file-progress">0 / 4 已载入</span><button class="btn sm ghost" id="btn-clear-workspace">清空工作台</button></div>
+            </div>
+            <div class="card-body">
+              <div class="file-grid">
+                <article class="file-slot" data-kind="profile" data-testid="file-slot-profile">
+                  <div class="file-slot-head"><div><h3>profile.cfg</h3><span>FOV · 手柄 · 按键</span></div><span class="file-state" data-state>未载入</span></div>
+                  <div class="dropzone compact" tabindex="0" role="button" aria-label="选择 profile.cfg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg><div><b>选择 profile.cfg</b><br><span>拖到这里，或点击选择</span></div></div>
+                  <input type="file" data-file-input="profile" accept=".cfg,.txt,text/plain" hidden>
+                  <div class="file-meta" data-meta><span class="muted">尚未选择文件</span></div>
+                  <div class="file-actions"><button class="btn sm ghost" data-file-choose="profile">选择文件</button><button class="btn sm ghost" data-file-paste="profile">粘贴文本</button><button class="btn sm ghost" data-file-remove="profile" hidden>移除</button></div>
+                  <div class="path-hint">通常位于 <span class="mono">Saved Games\Respawn\Apex\profile\profile.cfg</span></div>
+                </article>
+
+                <article class="file-slot" data-kind="settings" data-testid="file-slot-settings">
+                  <div class="file-slot-head"><div><h3>settings.cfg</h3><span>腰射灵敏度 · 8 档倍镜</span></div><span class="file-state" data-state>未载入</span></div>
+                  <div class="dropzone compact" tabindex="0" role="button" aria-label="选择 settings.cfg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg><div><b>选择 settings.cfg</b><br><span>拖到这里，或点击选择</span></div></div>
+                  <input type="file" data-file-input="settings" accept=".cfg,.txt,text/plain" hidden>
+                  <div class="file-meta" data-meta><span class="muted">尚未选择文件</span></div>
+                  <div class="file-actions"><button class="btn sm ghost" data-file-choose="settings">选择文件</button><button class="btn sm ghost" data-file-paste="settings">粘贴文本</button><button class="btn sm ghost" data-file-remove="settings" hidden>移除</button></div>
+                  <div class="path-hint">通常位于 <span class="mono">Saved Games\Respawn\Apex\local\settings.cfg</span></div>
+                </article>
+
+                <article class="file-slot" data-kind="videoconfig" data-testid="file-slot-videoconfig">
+                  <div class="file-slot-head"><div><h3>videoconfig.txt</h3><span>画质 · 分辨率 · 显示模式</span></div><span class="file-state" data-state>未载入</span></div>
+                  <div class="dropzone compact" tabindex="0" role="button" aria-label="选择 videoconfig.txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg><div><b>选择 videoconfig.txt</b><br><span>拖到这里，或点击选择</span></div></div>
+                  <input type="file" data-file-input="videoconfig" accept=".txt,.cfg,text/plain" hidden>
+                  <div class="file-meta" data-meta><span class="muted">尚未选择文件</span></div>
+                  <div class="file-actions"><button class="btn sm ghost" data-file-choose="videoconfig">选择文件</button><button class="btn sm ghost" data-file-paste="videoconfig">粘贴文本</button><button class="btn sm ghost" data-file-remove="videoconfig" hidden>移除</button></div>
+                  <div class="path-hint">通常位于 <span class="mono">Saved Games\Respawn\Apex\local\videoconfig.txt</span></div>
+                </article>
+
+                <article class="file-slot" data-kind="localconfig" data-testid="file-slot-localconfig">
+                  <div class="file-slot-head"><div><h3>localconfig.vdf <span class="pill mute">可选</span></h3><span>Steam LaunchOptions</span></div><span class="file-state" data-state>未载入</span></div>
+                  <div class="dropzone compact" tabindex="0" role="button" aria-label="选择 localconfig.vdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg><div><b>选择 localconfig.vdf</b><br><span>仅启动参数需要</span></div></div>
+                  <input type="file" data-file-input="localconfig" accept=".vdf,.txt,text/plain" hidden>
+                  <div class="file-meta" data-meta><span class="muted">尚未选择文件</span></div>
+                  <div class="file-actions"><button class="btn sm ghost" data-file-choose="localconfig">选择文件</button><button class="btn sm ghost" data-file-paste="localconfig">粘贴文本</button><button class="btn sm ghost" data-file-remove="localconfig" hidden>移除</button></div>
+                  <div class="path-hint">通常位于 <span class="mono">Steam\userdata\&lt;SteamID&gt;\config\localconfig.vdf</span></div>
+                </article>
+              </div>
+
+              <details class="help-details" id="file-paths-help">
+                <summary>如何找到这些文件？</summary>
+                <div class="help-list">
+                  <div><b>profile.cfg</b><span class="mono">%USERPROFILE%\Saved Games\Respawn\Apex\profile\profile.cfg</span><button class="btn sm ghost" data-copy-path="%USERPROFILE%\Saved Games\Respawn\Apex\profile\profile.cfg">复制路径</button></div>
+                  <div><b>settings.cfg</b><span class="mono">%USERPROFILE%\Saved Games\Respawn\Apex\local\settings.cfg</span><button class="btn sm ghost" data-copy-path="%USERPROFILE%\Saved Games\Respawn\Apex\local\settings.cfg">复制路径</button></div>
+                  <div><b>videoconfig.txt</b><span class="mono">%USERPROFILE%\Saved Games\Respawn\Apex\local\videoconfig.txt</span><button class="btn sm ghost" data-copy-path="%USERPROFILE%\Saved Games\Respawn\Apex\local\videoconfig.txt">复制路径</button></div>
+                  <div><b>localconfig.vdf</b><span class="mono">Steam\userdata\&lt;SteamID&gt;\config\localconfig.vdf</span><button class="btn sm ghost" data-copy-path="Steam\userdata\<SteamID>\config\localconfig.vdf">复制路径</button></div>
+                </div>
+                <p class="dim">如果文件不存在，先启动一次 Apex 并进入设置页，或确认当前 Windows 用户与 Steam 用户是否正确。</p>
+              </details>
+            </div>
+          </div>
+
+          <div class="grid k3">
+            <div class="card kpi"><div class="label">已载入文件</div><div class="value" id="kpi-files">0<small>/4</small></div><div class="foot" id="kpi-files-foot">等待手动上传</div></div>
+            <div class="card kpi"><div class="label">当前 FOV</div><div class="value" id="kpi-fov">—</div><div class="foot" id="kpi-fov-foot">来自 profile.cfg</div></div>
+            <div class="card kpi"><div class="label">腰射灵敏度</div><div class="value" id="kpi-sens">—</div><div class="foot" id="kpi-sens-foot">来自 settings.cfg</div></div>
+          </div>
+        </section>
+
+        <section class="page" data-page="dashboard" id="page-dashboard">
+          <div class="grid k4">
+            <div class="card metric"><div class="k">文件状态</div><div class="v" id="dash-file-count">0/4</div><div class="d" id="dash-file-note">请先载入文件</div></div>
+            <div class="card metric"><div class="k">当前 FOV</div><div class="v" id="dash-fov">—</div><div class="d" id="dash-fov-note">无 profile.cfg</div></div>
+            <div class="card metric"><div class="k">当前腰射</div><div class="v" id="dash-sens">—</div><div class="d" id="dash-sens-note">无 settings.cfg</div></div>
+            <div class="card metric"><div class="k">当前分辨率</div><div class="v" id="dash-res">—</div><div class="d" id="dash-res-note">无 videoconfig.txt</div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>当前配置</h2><span class="sub">真实文件值 · 带来源与行号</span><div class="right"><span class="pill mute" id="state-summary">等待文件</span><button class="btn sm ghost" id="btn-dashboard-refresh">刷新</button></div></div>
+            <div class="table-wrap" style="margin:var(--s-3) var(--s-5) var(--s-5)">
+              <table class="table compact">
+                <thead><tr><th>语义项</th><th style="width:180px">当前值</th><th>来源</th><th style="width:110px">状态</th></tr></thead>
+                <tbody id="state-overview-body"><tr><td colspan="4" class="muted">载入文件后显示真实当前值</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="grid split">
+            <div class="card">
+              <div class="card-head"><h2>文件与解析</h2><span class="sub">编码、行数与 SHA-256</span></div>
+              <div class="card-body tight" id="file-summary-list"><div class="rowitem"><div class="grow"><div class="title muted">尚未载入文件</div></div></div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>检查结果</h2><span class="sub">不会静默覆盖</span><div class="right"><span class="pill mute" id="warning-count">0 项</span></div></div>
+              <div class="card-body tight" id="warning-list"><div class="rowitem"><div class="grow"><div class="title muted">暂无检查结果</div></div></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>下一步</h2><span class="sub">所有修改先生成差异</span></div>
+            <div class="card-body">
+              <div class="quick-grid">
+                <button class="choice quick-action" data-goto="aim"><b>调视野与灵敏度</b><span>FOV、腰射、8 档倍镜、PSA 与过冲校准</span></button>
+                <button class="choice quick-action" data-goto="graphics"><b>调画质与分辨率</b><span>预设、4:3 拉伸、发光准星</span></button>
+                <button class="choice quick-action" data-goto="launch"><b>设置启动参数</b><span>LaunchOptions 与可选 localconfig.vdf</span></button>
+                <button class="choice quick-action" data-goto="export"><b>查看差异并导出</b><span>下载修改文件与原始回滚包</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" data-page="aim" id="page-aim">
+          <div class="banner info" id="aim-missing" hidden>
+            <div class="grow"><div class="title">需要更多文件才能编辑</div><span id="aim-missing-text">请先在文件工作台载入 profile.cfg 与 settings.cfg。</span></div>
+            <button class="btn sm" data-goto="loader">去载入文件</button>
+          </div>
+
+          <div class="grid split">
+            <div class="card">
+              <div class="card-head"><h2>视野与腰射</h2><span class="sub">真实值驱动 · 不做默认猜测</span><div class="right"><span class="pill mute" id="aim-state">等待文件</span></div></div>
+              <div class="card-body">
+                <div class="grid k2">
+                  <div class="field"><label for="aim-fov">视野 FOV <span class="mono" id="aim-fov-scale">cl_fovScale —</span></label><div class="input mono"><input id="aim-fov" data-testid="input-fov-degrees" type="number" min="70" max="120" step="1" placeholder="载入 profile.cfg"></div><div class="dim small" id="aim-fov-help">FOV 与 cl_fovScale 双向换算</div></div>
+                  <div class="field"><label for="aim-sens">腰射灵敏度 <span class="mono">mouse_sensitivity</span></label><div class="input mono"><input id="aim-sens" data-testid="input-mouse-sensitivity" type="number" min="0.1" max="10" step="0.001" placeholder="载入 settings.cfg"></div><div class="dim small" id="aim-edpi">eDPI —</div></div>
+                </div>
+                <div class="grid k3" style="margin-top:var(--s-4)">
+                  <div class="field"><label for="aim-dpi">鼠标 DPI</label><div class="input mono"><input id="aim-dpi" type="number" min="100" max="32000" step="50" value="800"></div></div>
+                  <div class="field"><label for="aim-pad">鼠标垫宽度（cm）</label><div class="input mono"><input id="aim-pad" type="number" min="20" max="100" step="1" value="45"></div></div>
+                  <div class="field"><label for="aim-grip">握姿流派</label><select class="select" id="aim-grip"><option value="wrist">手腕流</option><option value="arm">手臂流</option><option value="finger">高敏手指流</option></select></div>
+                </div>
+                <div class="list" id="aim-summary" style="margin-top:var(--s-3)"></div>
+                <div class="btn-row" style="margin-top:var(--s-3)"><button class="btn primary" id="btn-aim-review">生成差异并审阅</button><button class="btn ghost" id="btn-aim-reset">重置为目标</button></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h2>8 档倍镜</h2><span class="sub">0..7 完整覆盖</span><div class="right"><button class="btn sm" id="btn-focal-lock" data-testid="btn-focal-lock">生成 1:1 八槽</button></div></div>
+              <div class="card-body">
+                <div class="field"><label for="aim-scope-mode">倍镜策略</label><select class="select" id="aim-scope-mode" data-testid="input-scope-mode"><option value="keep">保持当前倍镜（不写任何 scalar）</option><option value="match">按当前 FOV 匹配 1:1（写入 0..7）</option><option value="off">关闭逐倍镜总开关（不改 scalar）</option><option value="custom">手动指定 8 个槽位</option></select></div>
+                <div class="scope-table-wrap"><table class="table compact"><thead><tr><th>槽位</th><th>倍率</th><th class="num">当前</th><th class="num">目标</th></tr></thead><tbody id="aim-scope-body"></tbody></table></div>
+                <div class="list" id="aim-scope-note" style="margin-top:var(--s-3)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid k2">
+            <article class="card" data-testid="psa-wizard">
+              <div class="card-head"><h2>PSA 黄金逼近</h2><span class="sub">二分收敛 · 5 轮</span><span class="pill info" id="psa-round">第 1 / 5 轮</span></div>
+              <div class="card-body">
+                <div class="grid k2">
+                  <div class="field"><label for="psa-base">当前基准灵敏度</label><div class="input mono"><input id="psa-base" data-testid="input-psa-base" type="number" min="0.01" max="10" step="0.001" placeholder="从 settings.cfg 读取"></div></div>
+                  <div class="field"><label for="psa-dpi">DPI</label><div class="input mono"><input id="psa-dpi" data-testid="input-psa-dpi" type="number" min="100" max="32000" step="50" value="800"></div></div>
+                </div>
+                <div class="precision-range" id="psa-range"><span class="range-label">Low <b id="psa-low">—</b></span><span class="range-track"><i id="psa-mid"></i></span><span class="range-label">High <b id="psa-high">—</b></span></div>
+                <div class="psa-choice" role="group" aria-label="PSA 靶场选择"><button class="choice" data-psa-choice="high" data-testid="btn-psa-high"><b>高敏更顺</b><span>转向更轻，近距离更灵活</span></button><button class="choice" data-psa-choice="low" data-testid="btn-psa-low"><b>低敏更顺</b><span>制动更稳，中远距离更容易停住</span></button></div>
+                <div class="list" id="psa-result"><div class="checkline"><span class="tag">状态</span>输入真实腰射值后开始第一轮测试。</div></div>
+                <div class="btn-row"><button class="btn primary" id="btn-psa-apply" data-testid="btn-psa-apply" disabled>将收敛值带入腰射</button><button class="btn ghost" id="btn-psa-reset">重新开始</button></div>
+              </div>
+            </article>
+
+            <article class="card" data-testid="error-calibration-wizard">
+              <div class="card-head"><h2>过冲 / 欠冲校准</h2><span class="sub">20 次盲甩 · 客观误差</span><span class="pill mute" id="calibration-balance">待记录</span></div>
+              <div class="card-body">
+                <div class="grid k2">
+                  <div class="field"><label for="cal-over">过冲次数</label><div class="input mono"><input id="cal-over" data-testid="input-cal-overshoot" type="number" min="0" max="20" step="1" value="0"></div></div>
+                  <div class="field"><label for="cal-under">欠冲次数</label><div class="input mono"><input id="cal-under" data-testid="input-cal-undershoot" type="number" min="0" max="20" step="1" value="0"></div></div>
+                </div>
+                <div class="calibration-bar"><i id="cal-over-bar"></i><i id="cal-under-bar"></i></div>
+                <div class="list" id="calibration-result"><div class="checkline"><span class="tag">安全域</span>根据握姿与鼠标垫宽度给出 cm/360 参考。</div></div>
+                <div class="btn-row"><button class="btn" id="btn-calibration-apply" data-testid="btn-calibration-apply" disabled>应用校准建议</button></div>
+              </div>
+            </article>
+          </div>
+
+          <article class="card" data-testid="pro-compare">
+            <div class="card-head"><h2>职业配置差异</h2><span class="sub">模块化勾选 · 保留你的手感</span><div class="right"><select class="select" id="pro-preset" data-testid="select-pro-preset"></select><button class="btn sm primary" id="btn-pro-preview" data-testid="btn-pro-preview">预览勾选差异</button></div></div>
+            <div class="card-body">
+              <div class="pro-modules" id="pro-modules"></div>
+              <div class="pro-diff" id="pro-diff" data-testid="pro-diff">选择预设后读取当前文件值。</div>
+              <button class="btn primary" id="btn-pro-apply" data-testid="btn-pro-apply" disabled>应用已勾选模块到草稿</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="page" data-page="graphics" id="page-graphics">
+          <div class="banner info" id="gfx-missing" hidden>
+            <div class="grow"><div class="title">需要 videoconfig.txt</div><span>画质与分辨率页只读取你上传的 videoconfig.txt。</span></div>
+            <button class="btn sm" data-goto="loader">去载入文件</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>画质与分辨率</h2><span class="sub">只改目标行，只读键永不写入</span><div class="right"><span class="pill mute" id="gfx-state">等待文件</span></div></div>
+            <div class="card-body">
+              <div class="grid k3" id="gfx-presets"></div>
+              <div class="row" style="margin-top:var(--s-4);gap:var(--s-3);flex-wrap:wrap;align-items:flex-end">
+                <div class="field field-inline"><label for="gfx-res">分辨率</label><select class="select" id="gfx-res" data-testid="input-resolution"><option value="">保持原样</option></select></div>
+                <div class="field" style="margin:0"><label>显示方式</label><div class="seg" id="gfx-mode"><button data-gfx-mode="fullscreen" aria-pressed="false">独占全屏</button><button data-gfx-mode="borderless" aria-pressed="false">无边框</button><button data-gfx-mode="keep" aria-pressed="true">保持原样</button></div></div>
+                <div class="seg" id="gfx-tier" style="margin-left:auto"></div>
+                <input class="input" id="gfx-search" placeholder="搜索键名 / 中文名" style="max-width:210px">
+              </div>
+              <div class="table-wrap" style="margin-top:var(--s-3);max-height:520px;overflow:auto">
+                <table class="table compact" data-testid="gfx-table">
+                  <thead><tr><th style="width:220px">设置项</th><th style="width:92px">当前</th><th style="width:190px">目标值</th><th>说明</th></tr></thead>
+                  <tbody id="gfx-body"><tr><td colspan="4" class="muted">载入 videoconfig.txt 后显示</td></tr></tbody>
+                </table>
+              </div>
+              <div class="grid config" style="margin-top:var(--s-3)">
+                <div class="diff"><div class="diff-head"><span>目标差异</span><span class="pill warn" style="margin-left:auto" id="gfx-diff-pill">未生成</span></div><div class="diff-body" id="gfx-diff" data-testid="diff-container"><div class="diff-line"><span class="sign">&nbsp;</span><span class="dim">点击「生成差异并审阅」</span></div></div></div>
+                <div style="display:flex;flex-direction:column;gap:var(--s-3)">
+                  <div class="banner ok"><div class="grow"><div class="title" id="gfx-status-title">等待载入</div><span id="gfx-status-text">不会把 last_display_* 或未知键加入目标。</span></div></div>
+                  <div class="btn-row"><button class="btn primary" data-testid="btn-gfx-preview" id="btn-gfx-review">生成差异并审阅</button><button class="btn ghost" id="btn-gfx-reset">重置目标值</button></div>
+                  <div class="dim small" id="gfx-sha">sha256 —</div>
+                </div>
+              </div>
+
+              <div class="grid k2 feature-row">
+                <article class="card flat" data-testid="stretch-resolution"><div class="card-head"><h2>拉伸分辨率</h2><span class="sub">只写 4 项安全键</span></div><div class="card-body"><div class="stretch-grid" id="stretch-options"></div><div class="checkline warn"><span class="tag">保护</span><span>严格排除 <span class="mono">last_display_width/height</span>，只生成 defaultres、defaultresheight、fullscreen、nowindowborder。</span></div></div></article>
+                <article class="card flat" data-testid="reticle-preview"><div class="card-head"><h2>发光准星实景预览</h2><span class="sub">悬停验证极端光照</span></div><div class="card-body"><div class="reticle-controls"><label class="field"><span>R</span><input id="reticle-r" type="number" min="0" max="400" value="150"></label><label class="field"><span>G</span><input id="reticle-g" type="number" min="0" max="400" value="350"></label><label class="field"><span>B</span><input id="reticle-b" type="number" min="0" max="400" value="150"></label></div><div class="reticle-scenes" id="reticle-scenes"><div class="reticle-scene snow"><i></i><span>世界边缘雪地</span></div><div class="reticle-scene dark"><i></i><span>残骸室内暗角</span></div><div class="reticle-scene lava"><i></i><span>热能熔岩高光</span></div></div></div></article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" data-page="launch" id="page-launch">
+          <div class="grid split">
+            <div class="card">
+              <div class="card-head"><h2>启动参数</h2><span class="sub">可选 localconfig.vdf</span><div class="right"><span class="pill mute" id="launch-state">未载入 VDF</span></div></div>
+              <div class="card-body">
+                <div class="banner info" id="launch-no-vdf"><div class="grow"><div class="title">没有 localconfig.vdf 也能用</div>下面的参数会生成一段可复制的 LaunchOptions 文本；载入 VDF 后才能导出修改后的文件。</div><button class="btn sm" data-goto="loader">载入 VDF</button></div>
+                <div class="list" id="launch-current"><div class="checkline"><span class="tag">当前</span>未读取 LaunchOptions。</div></div>
+                <div class="card-head" style="padding:0 0 var(--s-2);margin-top:var(--s-4)"><h2>推荐参数</h2><span class="sub">只提供已验证的常用项</span></div>
+                <div class="checkbox-grid" id="launch-catalog"></div>
+                <div class="field" style="margin-top:var(--s-4)"><label for="launch-custom">额外参数（每行一个 token 或整行文本）</label><textarea class="input mono" id="launch-custom" rows="4" placeholder="例如：-novid +fps_max 240"></textarea></div>
+                <div class="btn-row"><button class="btn" id="btn-launch-copy">复制参数</button><button class="btn primary" id="btn-launch-review">生成 VDF 差异</button></div>
+                <div class="dim small" style="margin-top:var(--s-2)">LaunchOptions 的修改需要退出 Steam 后再替换 localconfig.vdf。</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h2>参数预览</h2><span class="sub">当前 → 目标</span></div>
+              <div class="card-body">
+                <div class="field"><label>当前 LaunchOptions</label><div class="code" id="launch-current-options">—</div></div>
+                <div class="field" style="margin-top:var(--s-3)"><label>目标 LaunchOptions</label><div class="code" id="launch-target-options">—</div></div>
+                <div class="list" id="launch-warnings" style="margin-top:var(--s-3)"></div>
+                <div class="btn-row"><button class="btn" id="btn-launch-open-steam">打开 Apex（Steam）</button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" data-page="export" id="page-export">
+          <div class="banner info"><div class="grow"><div class="title">导出不会自动覆盖游戏文件</div>下载修改后的文件后，请关闭 Apex，将文件替换到原路径，再重新启动游戏。下载包同时包含原始文件，随时可恢复。</div></div>
+
+          <div class="grid split">
+            <div class="card">
+              <div class="card-head"><h2>审阅单</h2><span class="sub">先看差异，再导出</span><div class="right"><span class="pill mute" id="review-state">尚未生成</span></div></div>
+              <div class="card-body">
+                <div class="btn-row"><button class="btn primary" id="btn-review-build">生成差异</button><button class="btn ghost" id="btn-review-clear">清空审阅单</button></div>
+                <div class="list" id="review-summary" style="margin-top:var(--s-3)"><div class="checkline"><span class="tag">说明</span>先在各页面调整目标值，再回到这里生成差异。</div></div>
+                <div class="diff" style="margin-top:var(--s-3)"><div class="diff-head"><span>变更明细</span><span class="pill warn" style="margin-left:auto" id="review-change-count">0 项</span></div><div class="diff-body" id="review-diff" data-testid="review-diff"><div class="diff-line"><span class="sign">&nbsp;</span><span class="dim">尚未生成审阅单</span></div></div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h2>导出</h2><span class="sub">修改文件 + 原始回滚包</span></div>
+              <div class="card-body">
+                <div class="export-actions">
+                  <button class="btn primary" id="btn-export-zip" disabled>下载配置包（ZIP）</button>
+                  <button class="btn" id="btn-export-folder" disabled>保存到文件夹…</button>
+                  <button class="btn ghost" id="btn-export-originals" disabled>下载原始回滚包</button>
+                </div>
+                <div class="list" id="export-notes" style="margin-top:var(--s-3)"><div class="checkline"><span class="tag">下一步</span>生成审阅单后可导出。</div></div>
+                <div class="hr"></div>
+                <div class="card-head" style="padding:0 0 var(--s-2)"><h2>单文件下载</h2><span class="sub">用于手动替换</span></div>
+                <div class="list" id="export-files"><div class="rowitem"><div class="grow"><div class="title muted">尚无修改文件</div></div></div></div>
+                <div class="hr"></div>
+                <div class="rowitem"><div class="grow"><div class="title">本机会话</div><div class="meta" id="session-state">未保存</div></div><button class="btn sm ghost" id="btn-clear-session">清除会话</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>替换步骤</h2><span class="sub">按顺序操作</span></div>
+            <div class="card-body">
+              <ol class="steps-list">
+                <li>完全退出 Apex，必要时退出 Steam（启动参数需要退出 Steam）。</li>
+                <li>下载配置包，解压后把修改后的文件替换到原路径。</li>
+                <li>把原始回滚包保留在安全位置；需要撤销时用它替换回去。</li>
+                <li>重新启动 Apex，再回到文件工作台重新载入文件，确认目标值已生效。</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="statusbar">
+      <span class="item"><span class="dot" id="status-dot"></span><b id="status-text">就绪</b></span>
+      <span class="item" id="status-last">未载入文件</span>
+      <div class="right">
+        <span class="item" id="status-file-count">文件 0/4</span>
+        <span class="item" id="status-network">本地解析</span>
+        <span class="item">Apex 1172470</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg><span id="toast-text">已保存</span></div>
+
+<dialog id="modal" class="modal" aria-labelledby="modal-title" data-testid="review-modal">
+  <div class="modal-head"><h2 id="modal-title">确认</h2><button class="btn icon" id="modal-close" title="关闭" aria-label="关闭">×</button></div>
+  <div class="modal-body" id="modal-body"></div>
+  <div class="modal-foot">
+    <label class="checkline modal-check" id="modal-check-wrap" hidden><input type="checkbox" id="modal-confirm-check"> 我已核对差异，并理解浏览器不会自动覆盖游戏文件</label>
+    <div class="btn-row"><button class="btn ghost" id="modal-cancel">取消</button><button class="btn primary" id="modal-ok" disabled>确认</button></div>
+  </div>
+</dialog>
+
+<script src="guard.js"></script>
+<script src="app.js" defer></script>
+</body>
+</html>
