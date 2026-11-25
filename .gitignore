@@ -15,6 +15,7 @@ _legacy/
 **/bin/
 **/obj/
 **/dist/
+**/target/
 node_modules/
 
 # OS / editor

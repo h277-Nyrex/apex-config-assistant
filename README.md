@@ -24,6 +24,7 @@
 - 启动参数：生成 LaunchOptions 文本；载入 VDF 后可生成修改后的 `localconfig.vdf`。
 - 导出与恢复：行级差异、修改文件、原始回滚包、ZIP、Chromium 文件夹导出、重新上传后的审阅单过期检测。
 - 本地会话：IndexedDB 自动保存，刷新后可选择恢复；不会重新扫描磁盘。
+- Rust 核心：`core/` 提供可测试的配置补丁、只读键保护、FOV/倍镜、PSA 与误差校准实现。
 
 ## 数据与边界
 
@@ -35,6 +36,14 @@
 - 浏览器不能自动跨文件写回，也不能检测游戏是否运行；替换文件前需手动退出游戏。
 - 启动参数写入 `localconfig.vdf` 前需退出 Steam。
 - `<input type="file">` 无法保留用户磁盘路径，因此导出后需要按页面提示手动替换。
+
+## Rust 核心验证
+
+`core/` 是后续 WASM 或 Tauri 接入的稳定计算层，当前页面仍保持直接打开即可用。Windows 下建议将 Cargo 构建目录放在 ASCII 路径：
+
+```powershell
+cargo test --manifest-path core/Cargo.toml --target-dir E:\RJ\apex-core-target
+```
 
 ## 文件说明
 

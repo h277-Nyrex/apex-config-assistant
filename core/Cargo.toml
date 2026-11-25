@@ -1,0 +1,10 @@
+[package]
+name = "apex-config-core"
+version = "0.1.0"
+edition = "2021"
+description = "Deterministic Apex configuration parsing, patching, and aim calculations"
+license = "MIT"
+
+[lib]
+name = "apex_config_core"
+path = "src/lib.rs"
