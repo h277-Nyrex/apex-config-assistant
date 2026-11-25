@@ -8,3 +8,4 @@ license = "MIT"
 [lib]
 name = "apex_config_core"
 path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]

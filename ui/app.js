@@ -5,6 +5,28 @@
 (() => {
   'use strict';
 
+  let rustCore = null;
+
+  async function loadRustCore() {
+    if (!window.WebAssembly || !window.fetch) return null;
+    try {
+      const response = await fetch('core.wasm', { cache: 'no-store' });
+      if (!response.ok) return null;
+      const result = WebAssembly.instantiateStreaming
+        ? await WebAssembly.instantiateStreaming(response, {})
+        : await WebAssembly.instantiate(await response.arrayBuffer(), {});
+      return result.instance.exports;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function markCoreStatus() {
+    document.documentElement.dataset.rustCore = rustCore ? 'ready' : 'fallback';
+    const chip = document.querySelector('#chip-mode span:last-child');
+    if (chip) chip.textContent = rustCore ? 'Rust 核心 · 本地解析' : 'JS 兼容模式 · 本地解析';
+  }
+
   const MAX_FILE_BYTES = 2 * 1024 * 1024;
   const FILE_KINDS = ['profile', 'settings', 'videoconfig', 'localconfig'];
   const KIND_LABEL = {
@@ -163,10 +185,14 @@
     if (!Number.isFinite(Number(value))) return '';
     return String(Number(Number(value).toFixed(digits)));
   };
-  const fovToScale = (fov) => 1 + (clamp(Number(fov), FOV_MIN, FOV_MAX) - FOV_BASE) * FOV_STEP;
+  const fovToScale = (fov) => rustCore
+    ? rustCore.apex_fov_to_scale(Number(fov))
+    : 1 + (clamp(Number(fov), FOV_MIN, FOV_MAX) - FOV_BASE) * FOV_STEP;
   const scaleToFov = (scale) => {
     const value = Number(scale);
-    return Number.isFinite(value) ? clamp(FOV_BASE + (value - 1) / FOV_STEP, FOV_MIN, FOV_MAX) : null;
+    if (!Number.isFinite(value)) return null;
+    const result = rustCore ? rustCore.apex_scale_to_fov(value) : FOV_BASE + (value - 1) / FOV_STEP;
+    return Number.isFinite(result) ? result : null;
   };
   const cm360 = (dpi, sens) => {
     const value = Number(dpi) * Number(sens) * APEX_YAW;
@@ -185,6 +211,7 @@
   const focalScalar = (fov, scopeIndex) => {
     const scope = SCOPES[scopeIndex] || SCOPES[0];
     if (scope.reserved || scope.zoom <= 0) return 1;
+    if (rustCore) return rustCore.apex_focal_scalar(Number(fov), scopeIndex);
     const row = locateAxis(SCOPE_FOV_AXIS, clamp(Number(fov) || 104, FOV_MIN, FOV_MAX));
     const column = locateAxis(SCOPE_ZOOM_AXIS, scope.zoom);
     const top = SCOPE_SCALAR_TABLE[row.index][column.index]
@@ -1099,7 +1126,10 @@
     const snap = getAimSnapshot();
     const sens = state.drafts.aim && state.drafts.aim.sens != null ? state.drafts.aim.sens : snap.sens;
     let recommendation = null;
-    if (total >= 10 && sens != null) {
+    if (rustCore && sens != null) {
+      const rustRecommendation = rustCore.apex_calibration(Number(sens), Math.round(over), Math.round(under));
+      recommendation = Number.isFinite(rustRecommendation) ? rustRecommendation : null;
+    } else if (total >= 10 && sens != null) {
       if (balance > 0.6) recommendation = sens * 0.9;
       else if (balance < 0.4) recommendation = sens * 1.1;
       else recommendation = sens;
@@ -2173,7 +2203,9 @@
     }
   }
 
-  function boot() {
+  async function boot() {
+    rustCore = await loadRustCore();
+    markCoreStatus();
     bindEvents();
     state.route = currentRoute();
     if (!location.hash) location.hash = 'loader';

@@ -1,6 +1,6 @@
 # Apex 配置核心
 
-这个 crate 把配置文件安全编辑和瞄准计算从页面状态中抽出来，作为后续 WASM 或 Tauri 接入的稳定核心。
+这个 crate 把配置文件安全编辑和瞄准计算从页面状态中抽出来。页面会加载仓库内的 `ui/core.wasm`，将 FOV、倍镜 scalar 和误差校准调用到 Rust；浏览器不支持或无法加载 WASM 时由页面保留等价的 JavaScript 回退。
 
 当前包含：
 
@@ -21,4 +21,4 @@ cargo fmt --manifest-path core/Cargo.toml
 cargo test --manifest-path core/Cargo.toml --target-dir E:\RJ\apex-core-target
 ```
 
-页面目前继续使用浏览器实现文件选择、导出和界面交互；核心 API 已独立成 Rust crate，后续可以在不改动配置规则的情况下编译到 WASM 或接入 Tauri。
+页面继续使用浏览器实现文件选择、导出和界面交互；`core.wasm` 负责可移植的数值计算，配置文件解析和导出规则仍由页面调用同一套约束完成。

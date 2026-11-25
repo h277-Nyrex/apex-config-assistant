@@ -24,7 +24,7 @@
 - 启动参数：生成 LaunchOptions 文本；载入 VDF 后可生成修改后的 `localconfig.vdf`。
 - 导出与恢复：行级差异、修改文件、原始回滚包、ZIP、Chromium 文件夹导出、重新上传后的审阅单过期检测。
 - 本地会话：IndexedDB 自动保存，刷新后可选择恢复；不会重新扫描磁盘。
-- Rust 核心：`core/` 提供可测试的配置补丁、只读键保护、FOV/倍镜、PSA 与误差校准实现。
+- Rust 核心：页面启动时加载 `ui/core.wasm`，优先使用 Rust 进行 FOV、8 档倍镜和误差校准计算；WASM 不可用时自动回退到等价的 JavaScript 实现。`core/` 同时提供可测试的配置补丁、只读键保护与计算层。
 
 ## 数据与边界
 
@@ -39,16 +39,18 @@
 
 ## Rust 核心验证
 
-`core/` 是后续 WASM 或 Tauri 接入的稳定计算层，当前页面仍保持直接打开即可用。Windows 下建议将 Cargo 构建目录放在 ASCII 路径：
+页面通过 `ui/core.wasm` 实际调用 Rust 核心。直接用 `file://` 打开时浏览器可能禁止加载 WASM，建议使用静态 HTTP 服务；WASM 加载失败会自动回退到 JavaScript 兼容模式。Windows 下建议将 Cargo 构建目录放在 ASCII 路径：
 
 ```powershell
-cargo test --manifest-path core/Cargo.toml --target-dir E:\RJ\apex-core-target
+cargo test --locked --manifest-path core/Cargo.toml --target-dir E:\RJ\apex-core-target
+cargo build --release --target wasm32-unknown-unknown --manifest-path core/Cargo.toml --target-dir E:\RJ\apex-core-target
 ```
 
 ## 文件说明
 
 - `ui/index.html`：静态入口。
 - `ui/app.js`：解析、换算、差异、ZIP 与本地会话。
+- `ui/core.wasm`：页面实际加载的 Rust 数值计算核心。
 - `ui/app.css`：视觉系统与响应式布局。
 - `ui/guard.js`：早期错误标记，便于诊断。
 - `WEB-ONLY-SPEC.md`：纯网页产品与验收规格。

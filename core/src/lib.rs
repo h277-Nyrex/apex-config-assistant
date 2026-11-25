@@ -349,10 +349,20 @@ pub fn fov_to_scale(fov: f64) -> f64 {
     1.0 + (clamp(fov, FOV_MIN, FOV_MAX) - FOV_BASE) * FOV_STEP
 }
 
+#[no_mangle]
+pub extern "C" fn apex_fov_to_scale(fov: f64) -> f64 {
+    fov_to_scale(fov)
+}
+
 pub fn scale_to_fov(scale: f64) -> Option<f64> {
     scale
         .is_finite()
         .then(|| clamp(FOV_BASE + (scale - 1.0) / FOV_STEP, FOV_MIN, FOV_MAX))
+}
+
+#[no_mangle]
+pub extern "C" fn apex_scale_to_fov(scale: f64) -> f64 {
+    scale_to_fov(scale).unwrap_or(f64::NAN)
 }
 
 pub fn cm360(dpi: f64, sensitivity: f64) -> Option<f64> {
@@ -379,6 +389,11 @@ pub fn focal_scalar(fov: f64, scope_index: usize) -> f64 {
     let top = interpolate(TABLE[fov_point.index], zoom_point.index, zoom_point.t);
     let bottom = interpolate(TABLE[fov_point.index + 1], zoom_point.index, zoom_point.t);
     clamp(top + (bottom - top) * fov_point.t, 0.1, 10.0)
+}
+
+#[no_mangle]
+pub extern "C" fn apex_focal_scalar(fov: f64, scope_index: usize) -> f64 {
+    focal_scalar(fov, scope_index)
 }
 
 pub fn focal_scalars(fov: f64) -> [f64; 8] {
@@ -439,6 +454,13 @@ pub fn calibrate(sensitivity: Option<f64>, overshoot: u32, undershoot: u32) -> C
             direction: CalibrationDirection::Hold,
         }
     }
+}
+
+#[no_mangle]
+pub extern "C" fn apex_calibration(sensitivity: f64, overshoot: u32, undershoot: u32) -> f64 {
+    calibrate(Some(sensitivity), overshoot, undershoot)
+        .recommendation
+        .unwrap_or(f64::NAN)
 }
 
 fn is_known_key(kind: ConfigKind, key: &str) -> bool {
